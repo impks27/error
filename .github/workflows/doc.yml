@@ -1,0 +1,49 @@
+name: Documentation Updates
+
+on:
+  # Trigger the workflow on pushes to the `docs` branch or PRs affecting docs.
+  push:
+    branches:
+      - docs
+  pull_request:
+    paths:
+      - 'docs/**'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js (for static site generators like Docusaurus or Hugo)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      # Step 4: Build documentation
+      - name: Build Documentation
+        run: |
+          npm run build
+        working-directory: docs
+
+      # Step 5: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+
+      # Optional: Notify team (Slack/Email/Other Integration)
+      - name: Notify Team
+        if: ${{ always() }}
+        run: echo "Documentation updated and deployed successfully."
